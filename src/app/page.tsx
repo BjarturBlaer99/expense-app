@@ -1,101 +1,180 @@
-import Image from "next/image";
+"use client";
+import ExpenseForm from "@/components/ExpenseForm";
+import ExpenseList from "@/components/ExpenseList";
+import ExpenseCharts from "@/components/ExpenseCharts";
+import SpendingGoal from "@/components/SpendingGoal";
+import CategoryBudgets from "@/components/CategoryBudgets";
+import { useExpenses } from "@/lib/useExpenses";
+import { Expense } from "@/types/expense";
+import { useState } from "react";
+import {
+  ChartBarIcon,
+  WalletIcon,
+  CalendarIcon,
+  CurrencyDollarIcon,
+  ArrowTrendingUpIcon,
+  AdjustmentsHorizontalIcon,
+} from "@heroicons/react/24/outline";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { expenses, addExpense, deleteExpense, isLoading } = useExpenses();
+  const [month, setMonth] = useState<string>("all");
+  const [year, setYear] = useState<string>("all");
+  const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
+  const [monthlyGoal, setMonthlyGoal] = useState<number>(0);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  console.log("Main page expenses:", expenses);
+
+  const filteredExpenses = expenses.filter((expense) => {
+    const date = new Date(expense.date);
+    const matchesMonth = month === "all" || date.getMonth() + 1 === parseInt(month);
+    const matchesYear = year === "all" || date.getFullYear() === parseInt(year);
+    return matchesMonth && matchesYear;
+  });
+
+  // Calculate current month's total
+  const currentDate = new Date();
+  const currentMonthTotal = expenses
+    .filter(expense => {
+      const expenseDate = new Date(expense.date);
+      return expenseDate.getMonth() === currentDate.getMonth() &&
+             expenseDate.getFullYear() === currentDate.getFullYear();
+    })
+    .reduce((sum, expense) => sum + expense.amount, 0);
+
+  const total = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+  const formatISK = (amount: number) =>
+    new Intl.NumberFormat("is-IS", {
+      style: "currency",
+      currency: "ISK",
+      maximumFractionDigits: 0,
+    }).format(amount);
+
+  const years = Array.from(new Set(expenses.map((e) => new Date(e.date).getFullYear())));
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
+        <div className="max-w-6xl mx-auto mt-28">
+          <div className="text-center text-gray-400">
+            Loading expenses...
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
+      <div className="max-w-6xl mx-auto mt-28">
+        <div className="text-center mb-8 animate-fade-in">
+          <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-2 flex items-center justify-center gap-2">
+            <WalletIcon className="w-8 h-8 animate-pulse" />
+            Our Expense Tracker
+          </h1>
+          <p className="text-gray-400 text-sm sm:text-base animate-slide-up delay-100">
+            Track, analyze, and manage your expenses with ease
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+          <div className="space-y-6">
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-200">
+              <div className="flex items-center gap-2 mb-4">
+                <CurrencyDollarIcon className="w-5 h-5 text-blue-400 animate-pulse" />
+                <h2 className="text-lg font-semibold text-white">Add New Expense</h2>
+              </div>
+              <ExpenseForm 
+                onAdd={addExpense} 
+                selectedExpenseId={selectedExpenseId}
+                setSelectedExpenseId={setSelectedExpenseId}
+              />
+            </div>
+
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-300">
+              <div className="flex items-center gap-2 mb-4">
+                <AdjustmentsHorizontalIcon className="w-5 h-5 text-blue-400 animate-pulse" />
+                <h2 className="text-lg font-semibold text-white">Filter Expenses</h2>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
+                <select
+                  className="w-full sm:w-auto p-2 border border-gray-600 rounded-lg bg-gray-700/50 text-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-blue-500/50"
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
+                >
+                  <option value="all">All Months</option>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i + 1} value={String(i + 1)}>
+                      {new Date(0, i).toLocaleString("is-IS", { month: "long" })}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="w-full sm:w-auto p-2 border border-gray-600 rounded-lg bg-gray-700/50 text-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-blue-500/50"
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                >
+                  <option value="all">All Years</option>
+                  {years.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-400">
+              <div className="flex items-center gap-2 mb-4">
+                <CalendarIcon className="w-5 h-5 text-blue-400 animate-pulse" />
+                <h2 className="text-lg font-semibold text-white">Expense List</h2>
+              </div>
+              <ExpenseList 
+                expenses={filteredExpenses} 
+                selectedExpenseId={selectedExpenseId}
+                setSelectedExpenseId={setSelectedExpenseId}
+                onDelete={deleteExpense}
+              />
+              <div className="text-right text-lg sm:text-xl font-bold text-white mt-4 pt-4 border-t border-gray-700/50 animate-fade-in">
+                Total: {formatISK(total)}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-200">
+              <div className="flex items-center gap-2 mb-4">
+                <ArrowTrendingUpIcon className="w-5 h-5 text-blue-400 animate-pulse" />
+                <h2 className="text-lg font-semibold text-white">Monthly Goal</h2>
+              </div>
+              <SpendingGoal 
+                currentMonthTotal={currentMonthTotal}
+                onGoalChange={setMonthlyGoal}
+              />
+            </div>
+
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-300">
+              <div className="flex items-center gap-2 mb-4">
+                <ChartBarIcon className="w-5 h-5 text-blue-400 animate-pulse" />
+                <h2 className="text-lg font-semibold text-white">Category Budgets</h2>
+              </div>
+              <CategoryBudgets expenses={expenses} />
+            </div>
+
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-400">
+              <div className="flex items-center gap-2 mb-4">
+                <ChartBarIcon className="w-5 h-5 text-blue-400 animate-pulse" />
+                <h2 className="text-lg font-semibold text-white">Expense Analytics</h2>
+              </div>
+              <ExpenseCharts 
+                expenses={expenses} 
+                monthlyGoal={monthlyGoal}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
