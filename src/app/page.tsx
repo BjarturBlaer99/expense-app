@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseList from "@/components/ExpenseList";
 import ExpenseCharts from "@/components/ExpenseCharts";
@@ -6,7 +7,6 @@ import SpendingGoal from "@/components/SpendingGoal";
 import CategoryBudgets from "@/components/CategoryBudgets";
 import { useExpenses } from "@/lib/useExpenses";
 import { Expense } from "@/types/expense";
-import { useState } from "react";
 import {
   ChartBarIcon,
   WalletIcon,
@@ -90,6 +90,9 @@ export default function Home() {
                 selectedExpenseId={selectedExpenseId}
                 setSelectedExpenseId={setSelectedExpenseId}
               />
+              <div className="text-right text-lg sm:text-xl font-bold text-white mt-4 pt-4 border-t border-gray-700/50 animate-fade-in">
+                Total: {formatISK(total)}
+              </div>
             </div>
 
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-300">
@@ -136,9 +139,6 @@ export default function Home() {
                 setSelectedExpenseId={setSelectedExpenseId}
                 onDelete={deleteExpense}
               />
-              <div className="text-right text-lg sm:text-xl font-bold text-white mt-4 pt-4 border-t border-gray-700/50 animate-fade-in">
-                Total: {formatISK(total)}
-              </div>
             </div>
           </div>
 
