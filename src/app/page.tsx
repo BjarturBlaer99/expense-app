@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseList from "@/components/ExpenseList";
 import ExpenseCharts from "@/components/ExpenseCharts";
@@ -22,6 +22,20 @@ export default function Home() {
   const [year, setYear] = useState<string>("all");
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
   const [monthlyGoal, setMonthlyGoal] = useState<number>(0);
+  const [currentMonthTotal, setCurrentMonthTotal] = useState<number>(0);
+
+  // Calculate current month's total whenever expenses change
+  useEffect(() => {
+    const currentDate = new Date();
+    const total = expenses
+      .filter(expense => {
+        const expenseDate = new Date(expense.date);
+        return expenseDate.getMonth() === currentDate.getMonth() &&
+               expenseDate.getFullYear() === currentDate.getFullYear();
+      })
+      .reduce((sum, expense) => sum + expense.amount, 0);
+    setCurrentMonthTotal(total);
+  }, [expenses]);
 
   console.log("Main page expenses:", expenses);
 
@@ -31,16 +45,6 @@ export default function Home() {
     const matchesYear = year === "all" || date.getFullYear() === parseInt(year);
     return matchesMonth && matchesYear;
   });
-
-  // Calculate current month's total
-  const currentDate = new Date();
-  const currentMonthTotal = expenses
-    .filter(expense => {
-      const expenseDate = new Date(expense.date);
-      return expenseDate.getMonth() === currentDate.getMonth() &&
-             expenseDate.getFullYear() === currentDate.getFullYear();
-    })
-    .reduce((sum, expense) => sum + expense.amount, 0);
 
   const total = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
 
