@@ -134,6 +134,22 @@ export default function Home() {
               </h2>
               <ExpenseCharts expenses={expenses} />
             </div>
+
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
+                Monthly Overview
+              </h2>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300">Current Month Total:</span>
+                  <span className="text-xl font-semibold text-white">{formatISK(currentMonthTotal)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300">Filtered Total:</span>
+                  <span className="text-xl font-semibold text-white">{formatISK(total)}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
