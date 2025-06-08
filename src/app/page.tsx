@@ -15,9 +15,10 @@ import {
   ArrowTrendingUpIcon,
   AdjustmentsHorizontalIcon,
 } from "@heroicons/react/24/outline";
+import ImportExpenses from "@/components/ImportExpenses";
 
 export default function Home() {
-  const { expenses, addExpense, deleteExpense, isLoading } = useExpenses();
+  const { expenses, addExpense, deleteExpense, updateExpense, isLoading } = useExpenses();
   const [month, setMonth] = useState<string>("all");
   const [year, setYear] = useState<string>("all");
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
@@ -57,6 +58,20 @@ export default function Home() {
 
   const years = Array.from(new Set(expenses.map((e) => new Date(e.date).getFullYear())));
 
+  const handleDelete = async (id: string) => {
+    await deleteExpense(id);
+    if (selectedExpenseId === id) {
+      setSelectedExpenseId(null);
+    }
+  };
+
+  const handleUpdate = async (expense: Omit<Expense, "id">) => {
+    if (selectedExpenseId) {
+      await updateExpense(selectedExpenseId, expense);
+      setSelectedExpenseId(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
@@ -82,99 +97,42 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-          <div className="space-y-6">
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-200">
-              <div className="flex items-center gap-2 mb-4">
-                <CurrencyDollarIcon className="w-5 h-5 text-blue-400 animate-pulse" />
-                <h2 className="text-lg font-semibold text-white">Add New Expense</h2>
-              </div>
-              <ExpenseForm 
-                onAdd={addExpense} 
-                selectedExpenseId={selectedExpenseId}
-                setSelectedExpenseId={setSelectedExpenseId}
-              />
-              <div className="text-right text-lg sm:text-xl font-bold text-white mt-4 pt-4 border-t border-gray-700/50 animate-fade-in">
-                Total: {formatISK(total)}
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
+                Add New Expense
+              </h2>
+              <ExpenseForm />
             </div>
 
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-300">
-              <div className="flex items-center gap-2 mb-4">
-                <AdjustmentsHorizontalIcon className="w-5 h-5 text-blue-400 animate-pulse" />
-                <h2 className="text-lg font-semibold text-white">Filter Expenses</h2>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
-                <select
-                  className="w-full sm:w-auto p-2 border border-gray-600 rounded-lg bg-gray-700/50 text-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-blue-500/50"
-                  value={month}
-                  onChange={(e) => setMonth(e.target.value)}
-                >
-                  <option value="all">All Months</option>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <option key={i + 1} value={String(i + 1)}>
-                      {new Date(0, i).toLocaleString("is-IS", { month: "long" })}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className="w-full sm:w-auto p-2 border border-gray-600 rounded-lg bg-gray-700/50 text-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-blue-500/50"
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                >
-                  <option value="all">All Years</option>
-                  {years.map((y) => (
-                    <option key={y} value={y}>
-                      {y}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
+                Import Expenses
+              </h2>
+              <ImportExpenses />
             </div>
 
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-400">
-              <div className="flex items-center gap-2 mb-4">
-                <CalendarIcon className="w-5 h-5 text-blue-400 animate-pulse" />
-                <h2 className="text-lg font-semibold text-white">Expense List</h2>
-              </div>
-              <ExpenseList 
-                expenses={filteredExpenses} 
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
+                Expense List
+              </h2>
+              <ExpenseList
+                expenses={expenses}
+                onDelete={handleDelete}
+                onUpdate={handleUpdate}
                 selectedExpenseId={selectedExpenseId}
                 setSelectedExpenseId={setSelectedExpenseId}
-                onDelete={deleteExpense}
               />
             </div>
           </div>
 
           <div className="space-y-6">
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-200">
-              <div className="flex items-center gap-2 mb-4">
-                <ArrowTrendingUpIcon className="w-5 h-5 text-blue-400 animate-pulse" />
-                <h2 className="text-lg font-semibold text-white">Monthly Goal</h2>
-              </div>
-              <SpendingGoal 
-                currentMonthTotal={currentMonthTotal}
-                onGoalChange={setMonthlyGoal}
-              />
-            </div>
-
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-300">
-              <div className="flex items-center gap-2 mb-4">
-                <ChartBarIcon className="w-5 h-5 text-blue-400 animate-pulse" />
-                <h2 className="text-lg font-semibold text-white">Category Budgets</h2>
-              </div>
-              <CategoryBudgets expenses={expenses} />
-            </div>
-
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-slide-in delay-400">
-              <div className="flex items-center gap-2 mb-4">
-                <ChartBarIcon className="w-5 h-5 text-blue-400 animate-pulse" />
-                <h2 className="text-lg font-semibold text-white">Expense Analytics</h2>
-              </div>
-              <ExpenseCharts 
-                expenses={expenses} 
-                monthlyGoal={monthlyGoal}
-              />
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
+                Expense Analytics
+              </h2>
+              <ExpenseCharts expenses={expenses} />
             </div>
           </div>
         </div>

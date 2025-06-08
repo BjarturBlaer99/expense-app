@@ -1,69 +1,156 @@
+"use client";
+import { useState, Dispatch, SetStateAction } from "react";
 import { Expense } from "@/types/expense";
-import { Dispatch, SetStateAction } from "react";
-
-const formatISK = (amount: number) =>
-  new Intl.NumberFormat("is-IS", {
-    style: "currency",
-    currency: "ISK",
-    maximumFractionDigits: 0,
-  }).format(amount);
+import { formatISK } from "@/lib/utils";
 
 interface ExpenseListProps {
   expenses: Expense[];
+  onDelete: (id: string) => Promise<void>;
+  onUpdate: (expense: Omit<Expense, "id">) => Promise<void>;
   selectedExpenseId: string | null;
   setSelectedExpenseId: Dispatch<SetStateAction<string | null>>;
-  onDelete: (id: string) => void;
 }
 
-export default function ExpenseList({ expenses, selectedExpenseId, setSelectedExpenseId, onDelete }: ExpenseListProps) {
+export default function ExpenseList({
+  expenses,
+  onDelete,
+  onUpdate,
+  selectedExpenseId,
+  setSelectedExpenseId,
+}: ExpenseListProps) {
+  const [editingExpense, setEditingExpense] = useState<Omit<Expense, "id"> | null>(null);
+
+  const handleEdit = (expense: Expense) => {
+    setSelectedExpenseId(expense.id);
+    setEditingExpense({
+      title: expense.title,
+      amount: expense.amount,
+      date: expense.date,
+      category: expense.category,
+      user_id: expense.user_id,
+    });
+  };
+
+  const handleSave = async () => {
+    if (editingExpense) {
+      await onUpdate(editingExpense);
+      setEditingExpense(null);
+      setSelectedExpenseId(null);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingExpense(null);
+    setSelectedExpenseId(null);
+  };
+
   const categoryTotals = expenses.reduce<Record<string, number>>((totals, expense) => {
     totals[expense.category] = (totals[expense.category] || 0) + expense.amount;
     return totals;
   }, {});
 
   return (
-    <div className="mt-6">
-      <h2 className="text-xl font-semibold mb-2 text-white">Filtered Expenses</h2>
-      <ul className="space-y-2">
-        {expenses.map((expense) => (
-          <li 
-            key={expense.id} 
-            className={`bg-gray-800 p-3 shadow-lg rounded-lg border ${
-              selectedExpenseId === expense.id ? 'border-blue-500' : 'border-gray-700'
-            } cursor-pointer transition-colors`}
-            onClick={() => setSelectedExpenseId(expense.id)}
-          >
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <p className="font-medium text-white">{expense.title}</p>
-                <p className="text-sm text-gray-400">{expense.category}</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <p className="text-green-400 font-semibold">
-                    {formatISK(expense.amount)}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(expense.date).toLocaleDateString("is-IS")}
-                  </p>
-                </div>
+    <div className="space-y-4">
+      {expenses.map((expense) => (
+        <div
+          key={expense.id}
+          className="bg-gray-700/50 p-4 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors"
+        >
+          {selectedExpenseId === expense.id && editingExpense ? (
+            <div className="space-y-4">
+              <input
+                type="text"
+                value={editingExpense.title}
+                onChange={(e) =>
+                  setEditingExpense({ ...editingExpense, title: e.target.value })
+                }
+                className="w-full p-2 rounded bg-gray-700 border border-gray-600 text-white"
+                placeholder="Title"
+              />
+              <input
+                type="number"
+                value={editingExpense.amount}
+                onChange={(e) =>
+                  setEditingExpense({
+                    ...editingExpense,
+                    amount: parseFloat(e.target.value),
+                  })
+                }
+                className="w-full p-2 rounded bg-gray-700 border border-gray-600 text-white"
+                placeholder="Amount"
+              />
+              <input
+                type="date"
+                value={editingExpense.date}
+                onChange={(e) =>
+                  setEditingExpense({ ...editingExpense, date: e.target.value })
+                }
+                className="w-full p-2 rounded bg-gray-700 border border-gray-600 text-white"
+              />
+              <select
+                value={editingExpense.category}
+                onChange={(e) =>
+                  setEditingExpense({ ...editingExpense, category: e.target.value })
+                }
+                className="w-full p-2 rounded bg-gray-700 border border-gray-600 text-white"
+              >
+                <option value="Food">Food</option>
+                <option value="Transportation">Transportation</option>
+                <option value="Housing">Housing</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Education">Education</option>
+                <option value="Travel">Travel</option>
+                <option value="Other">Other</option>
+              </select>
+              <div className="flex space-x-2">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(expense.id);
-                  }}
-                  className="text-red-500 hover:text-red-400 transition-colors p-1"
-                  title="Delete expense"
+                  onClick={handleSave}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
+                  Save
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="flex-1 bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700"
+                >
+                  Cancel
                 </button>
               </div>
             </div>
-          </li>
-        ))}
-      </ul>
+          ) : (
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold text-white">{expense.title}</h3>
+                <p className="text-gray-300">
+                  {new Date(expense.date).toLocaleDateString("is-IS")} • {expense.category}
+                </p>
+              </div>
+              <div className="flex items-center space-x-4">
+                <span className="text-lg font-semibold text-white">
+                  {formatISK(expense.amount)}
+                </span>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleEdit(expense)}
+                    className="text-blue-400 hover:text-blue-300"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => onDelete(expense.id)}
+                    className="text-red-400 hover:text-red-300"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
       {/* Category totals */}
       <div className="mt-6">
         <h3 className="text-lg font-bold text-white">Totals by Category</h3>

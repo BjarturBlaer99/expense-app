@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { Expense } from "@/types/expense";
 import { supabase } from "./supabase";
@@ -52,6 +53,25 @@ export function useExpenses() {
     }
   };
 
+  const updateExpense = async (id: string, expense: Omit<Expense, "id">) => {
+    try {
+      const { data, error } = await supabase
+        .from("expenses")
+        .update(expense)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      setExpenses((prev) =>
+        prev.map((e) => (e.id === id ? { ...data, id } : e))
+      );
+    } catch (error) {
+      console.error("Error updating expense:", error);
+      throw error;
+    }
+  };
+
   const deleteExpense = async (id: string) => {
     try {
       console.log("Deleting expense from Supabase:", id);
@@ -72,5 +92,5 @@ export function useExpenses() {
     }
   };
 
-  return { expenses, addExpense, deleteExpense, isLoading };
+  return { expenses, addExpense, updateExpense, deleteExpense, isLoading };
 } 
