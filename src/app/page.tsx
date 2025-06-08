@@ -2,20 +2,14 @@
 import { useState, useEffect } from "react";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseList from "@/components/ExpenseList";
-import ExpenseCharts from "@/components/ExpenseCharts";
-import SpendingGoal from "@/components/SpendingGoal";
-import CategoryBudgets from "@/components/CategoryBudgets";
 import { useExpenses } from "@/lib/useExpenses";
 import { Expense } from "@/types/expense";
 import {
-  ChartBarIcon,
   WalletIcon,
   CalendarIcon,
   CurrencyDollarIcon,
-  ArrowTrendingUpIcon,
-  AdjustmentsHorizontalIcon,
+  PlusCircleIcon,
 } from "@heroicons/react/24/outline";
-import ImportExpenses from "@/components/ImportExpenses";
 
 export default function Home() {
   const { expenses, addExpense, deleteExpense, updateExpense, isLoading } = useExpenses();
@@ -37,8 +31,6 @@ export default function Home() {
       .reduce((sum, expense) => sum + expense.amount, 0);
     setCurrentMonthTotal(total);
   }, [expenses]);
-
-  console.log("Main page expenses:", expenses);
 
   const filteredExpenses = expenses.filter((expense) => {
     const date = new Date(expense.date);
@@ -72,10 +64,14 @@ export default function Home() {
     }
   };
 
+  const handleGoalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMonthlyGoal(Number(e.target.value));
+  };
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
-        <div className="max-w-6xl mx-auto mt-28">
+        <div className="max-w-7xl mx-auto mt-28">
           <div className="text-center text-gray-400">
             Loading expenses...
           </div>
@@ -86,35 +82,35 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
-      <div className="max-w-6xl mx-auto mt-28">
-        <div className="text-center mb-8 animate-fade-in">
-          <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-2 flex items-center justify-center gap-2">
-            <WalletIcon className="w-8 h-8 animate-pulse" />
-            Our Expense Tracker
+      <div className="max-w-7xl mx-auto mt-28">
+        {/* Header Section */}
+        <div className="text-center mb-12 animate-fade-in">
+          <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-4 flex items-center justify-center gap-3">
+            <WalletIcon className="w-10 h-10 animate-pulse" />
+            Expense Tracker
           </h1>
-          <p className="text-gray-400 text-sm sm:text-base animate-slide-up delay-100">
-            Track, analyze, and manage your expenses with ease
+          <p className="text-gray-400 text-lg animate-slide-up delay-100">
+            Track and manage your expenses with ease
           </p>
         </div>
 
+        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Expense Form and List */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
+            {/* Add Expense Form */}
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 hover:border-blue-500/50 transition-colors">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6 flex items-center gap-2">
+                <PlusCircleIcon className="w-6 h-6" />
                 Add New Expense
               </h2>
               <ExpenseForm />
             </div>
 
+            {/* Expense List */}
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
-                Import Expenses
-              </h2>
-              <ImportExpenses />
-            </div>
-
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6 flex items-center gap-2">
+                <CalendarIcon className="w-6 h-6" />
                 Expense List
               </h2>
               <ExpenseList
@@ -127,26 +123,59 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Right Column - Overview and Goals */}
           <div className="space-y-6">
+            {/* Monthly Overview */}
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
-                Expense Analytics
-              </h2>
-              <ExpenseCharts expenses={expenses} />
-            </div>
-
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6 flex items-center gap-2">
+                <CurrencyDollarIcon className="w-6 h-6" />
                 Monthly Overview
               </h2>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Current Month Total:</span>
-                  <span className="text-xl font-semibold text-white">{formatISK(currentMonthTotal)}</span>
+              <div className="space-y-6">
+                {/* Monthly Goal */}
+                <div className="bg-gray-700/30 rounded-xl p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-300">Monthly Goal</span>
+                    <input
+                      type="number"
+                      value={monthlyGoal}
+                      onChange={handleGoalChange}
+                      className="w-32 px-2 py-1 bg-gray-600 border border-gray-500 rounded text-white text-right"
+                      placeholder="Set goal..."
+                    />
+                  </div>
+                  <div className="h-2 bg-gray-600 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min((currentMonthTotal / (monthlyGoal || 1)) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <div className="mt-2 text-sm text-gray-400">
+                    {monthlyGoal > 0 ? (
+                      <span>
+                        {formatISK(currentMonthTotal)} of {formatISK(monthlyGoal)} spent
+                        ({Math.round((currentMonthTotal / monthlyGoal) * 100)}%)
+                      </span>
+                    ) : (
+                      <span>Set a monthly goal to track your spending</span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Filtered Total:</span>
-                  <span className="text-xl font-semibold text-white">{formatISK(total)}</span>
+
+                {/* Current Month Total */}
+                <div className="bg-gray-700/30 rounded-xl p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-300">Current Month Total</span>
+                    <span className="text-2xl font-bold text-white">{formatISK(currentMonthTotal)}</span>
+                  </div>
+                </div>
+
+                {/* Filtered Total */}
+                <div className="bg-gray-700/30 rounded-xl p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300">Filtered Total</span>
+                    <span className="text-2xl font-bold text-white">{formatISK(total)}</span>
+                  </div>
                 </div>
               </div>
             </div>
