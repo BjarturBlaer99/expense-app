@@ -11,8 +11,10 @@ import {
   ArcElement,
   PointElement,
   LineElement,
+  ChartData,
+  ChartOptions,
 } from 'chart.js';
-import { Pie, Bar } from 'react-chartjs-2';
+import { Pie, Bar, Line } from 'react-chartjs-2';
 
 ChartJS.register(
   CategoryScale,
@@ -75,15 +77,30 @@ export default function ExpenseCharts({ expenses, monthlyGoal }: ExpenseChartsPr
     ],
   };
 
-  const barChartData = {
+  const barChartData: ChartData<"bar"> = {
+    labels: Object.keys(categoryTotals),
+    datasets: [
+      {
+        label: "Expenses by Category",
+        data: Object.values(categoryTotals),
+        backgroundColor: "rgba(59, 130, 246, 0.5)",
+        borderColor: "rgb(59, 130, 246)",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const lineChartData: ChartData<"line"> = {
     labels: sortedMonths,
     datasets: [
       {
-        label: 'Monthly Spending',
+        label: "Monthly Expenses",
         data: sortedMonths.map(month => monthlyTotals[month]),
-        backgroundColor: '#36A2EB',
-        borderColor: '#36A2EB',
-        borderWidth: 1,
+        type: "line",
+        borderColor: "rgb(147, 51, 234)",
+        borderWidth: 2,
+        fill: false,
+        pointRadius: 4,
       },
       ...(monthlyGoal ? [{
         label: 'Monthly Goal',
@@ -117,39 +134,73 @@ export default function ExpenseCharts({ expenses, monthlyGoal }: ExpenseChartsPr
     },
   };
 
-  const barChartOptions = {
+  const barChartOptions: ChartOptions<"bar"> = {
     responsive: true,
     plugins: {
       legend: {
-        display: true,
+        position: "top" as const,
         labels: {
-          color: 'white',
+          color: "rgb(156, 163, 175)",
         },
       },
       title: {
         display: true,
-        text: 'Monthly Spending',
-        color: 'white',
-        font: {
-          size: 16,
-        },
+        text: "Expense Analysis",
+        color: "rgb(156, 163, 175)",
       },
     },
     scales: {
       y: {
-        ticks: {
-          color: 'white',
-        },
+        beginAtZero: true,
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: "rgba(75, 85, 99, 0.2)",
+        },
+        ticks: {
+          color: "rgb(156, 163, 175)",
         },
       },
       x: {
-        ticks: {
-          color: 'white',
-        },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: "rgba(75, 85, 99, 0.2)",
+        },
+        ticks: {
+          color: "rgb(156, 163, 175)",
+        },
+      },
+    },
+  };
+
+  const lineChartOptions: ChartOptions<"line"> = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+        labels: {
+          color: "rgb(156, 163, 175)",
+        },
+      },
+      title: {
+        display: true,
+        text: "Monthly Trend",
+        color: "rgb(156, 163, 175)",
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: "rgba(75, 85, 99, 0.2)",
+        },
+        ticks: {
+          color: "rgb(156, 163, 175)",
+        },
+      },
+      x: {
+        grid: {
+          color: "rgba(75, 85, 99, 0.2)",
+        },
+        ticks: {
+          color: "rgb(156, 163, 175)",
         },
       },
     },
@@ -163,6 +214,20 @@ export default function ExpenseCharts({ expenses, monthlyGoal }: ExpenseChartsPr
         </div>
         <div className="bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700">
           <Bar data={barChartData} options={barChartOptions} />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-200 mb-4">Expenses by Category</h3>
+          <div className="bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700">
+            <Bar data={barChartData} options={barChartOptions} />
+          </div>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-200 mb-4">Monthly Trend</h3>
+          <div className="bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700">
+            <Line data={lineChartData} options={lineChartOptions} />
+          </div>
         </div>
       </div>
     </div>
