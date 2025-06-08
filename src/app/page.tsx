@@ -19,6 +19,14 @@ export default function Home() {
   const [monthlyGoal, setMonthlyGoal] = useState<number>(0);
   const [currentMonthTotal, setCurrentMonthTotal] = useState<number>(0);
 
+  // Load saved monthly goal
+  useEffect(() => {
+    const savedGoal = localStorage.getItem('monthlyGoal');
+    if (savedGoal) {
+      setMonthlyGoal(Number(savedGoal));
+    }
+  }, []);
+
   // Calculate current month's total whenever expenses change
   useEffect(() => {
     const currentDate = new Date();
@@ -136,13 +144,21 @@ export default function Home() {
                 <div className="bg-gray-700/30 rounded-xl p-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-300">Monthly Goal</span>
-                    <input
-                      type="number"
-                      value={monthlyGoal}
-                      onChange={handleGoalChange}
-                      className="w-32 px-2 py-1 bg-gray-600 border border-gray-500 rounded text-white text-right"
-                      placeholder="Set goal..."
-                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={monthlyGoal}
+                        onChange={handleGoalChange}
+                        className="w-32 px-2 py-1 bg-gray-600 border border-gray-500 rounded text-white text-right"
+                        placeholder="Set goal..."
+                      />
+                      <button
+                        onClick={() => localStorage.setItem('monthlyGoal', monthlyGoal.toString())}
+                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                      >
+                        Save
+                      </button>
+                    </div>
                   </div>
                   <div className="h-2 bg-gray-600 rounded-full overflow-hidden">
                     <div 
