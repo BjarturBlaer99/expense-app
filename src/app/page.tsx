@@ -126,6 +126,37 @@ export default function Home() {
                 View All Expenses
               </Link>
             </div>
+
+            {/* Recent Expenses Summary */}
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
+                Recent Expenses
+              </h2>
+              <div className="space-y-4">
+                {expenses
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .slice(0, 5)
+                  .map((expense) => (
+                    <div
+                      key={expense.id}
+                      className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg"
+                    >
+                      <div>
+                        <div className="font-medium text-white">{expense.description}</div>
+                        <div className="text-sm text-gray-400">
+                          {new Date(expense.date).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="text-white font-medium">{formatISK(expense.amount)}</div>
+                    </div>
+                  ))}
+                {expenses.length === 0 && (
+                  <div className="text-center text-gray-400 py-4">
+                    No expenses yet. Add your first expense above!
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Right Column - Overview and Goals */}

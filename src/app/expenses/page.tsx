@@ -11,13 +11,29 @@ export default function ExpensesPage() {
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
   const [month, setMonth] = useState<string>("all");
   const [year, setYear] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"date" | "amount">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [minAmount, setMinAmount] = useState<string>("");
+  const [maxAmount, setMaxAmount] = useState<string>("");
 
-  const filteredExpenses = expenses.filter((expense) => {
-    const date = new Date(expense.date);
-    const matchesMonth = month === "all" || date.getMonth() + 1 === parseInt(month);
-    const matchesYear = year === "all" || date.getFullYear() === parseInt(year);
-    return matchesMonth && matchesYear;
-  });
+  const filteredExpenses = expenses
+    .filter((expense) => {
+      const date = new Date(expense.date);
+      const matchesMonth = month === "all" || date.getMonth() + 1 === parseInt(month);
+      const matchesYear = year === "all" || date.getFullYear() === parseInt(year);
+      const matchesMinAmount = !minAmount || expense.amount >= parseFloat(minAmount);
+      const matchesMaxAmount = !maxAmount || expense.amount <= parseFloat(maxAmount);
+      return matchesMonth && matchesYear && matchesMinAmount && matchesMaxAmount;
+    })
+    .sort((a, b) => {
+      if (sortBy === "date") {
+        return sortOrder === "asc"
+          ? new Date(a.date).getTime() - new Date(b.date).getTime()
+          : new Date(b.date).getTime() - new Date(a.date).getTime();
+      } else {
+        return sortOrder === "asc" ? a.amount - b.amount : b.amount - a.amount;
+      }
+    });
 
   const years = Array.from(new Set(expenses.map((e) => new Date(e.date).getFullYear())));
 
@@ -84,6 +100,37 @@ export default function ExpensesPage() {
                 </option>
               ))}
             </select>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as "date" | "amount")}
+              className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
+            >
+              <option value="date">Sort by Date</option>
+              <option value="amount">Sort by Amount</option>
+            </select>
+            <button
+              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+              className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white hover:bg-gray-600"
+            >
+              {sortOrder === "asc" ? "↑" : "↓"}
+            </button>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                value={minAmount}
+                onChange={(e) => setMinAmount(e.target.value)}
+                placeholder="Min amount"
+                className="w-32 bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
+              />
+              <span className="text-gray-400">-</span>
+              <input
+                type="number"
+                value={maxAmount}
+                onChange={(e) => setMaxAmount(e.target.value)}
+                placeholder="Max amount"
+                className="w-32 bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
+              />
+            </div>
           </div>
         </div>
 
