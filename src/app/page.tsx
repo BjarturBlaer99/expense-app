@@ -10,6 +10,7 @@ import {
   CurrencyDollarIcon,
   PlusCircleIcon,
 } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 export default function Home() {
   const { expenses, addExpense, deleteExpense, updateExpense, isLoading } = useExpenses();
@@ -115,19 +116,15 @@ export default function Home() {
               <ExpenseForm />
             </div>
 
-            {/* Expense List */}
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6 flex items-center gap-2">
-                <CalendarIcon className="w-6 h-6" />
-                Expense List
-              </h2>
-              <ExpenseList
-                expenses={expenses}
-                onDelete={handleDelete}
-                onUpdate={handleUpdate}
-                selectedExpenseId={selectedExpenseId}
-                setSelectedExpenseId={setSelectedExpenseId}
-              />
+            {/* View All Expenses Button */}
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-6 hover:border-blue-500/50 transition-colors">
+              <Link
+                href="/expenses"
+                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <CalendarIcon className="w-5 h-5" />
+                View All Expenses
+              </Link>
             </div>
           </div>
 
