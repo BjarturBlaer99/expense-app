@@ -94,10 +94,12 @@ export default function Home() {
       <div className="max-w-7xl mx-auto mt-28">
         {/* Header Section */}
         <div className="text-center mb-12 animate-fade-in">
-          <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-4 flex items-center justify-center gap-3">
-            <WalletIcon className="w-10 h-10 animate-pulse" />
-            Expense Tracker
-          </h1>
+          <Link href="/" className="inline-block">
+            <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-4 flex items-center justify-center gap-3 hover:from-blue-500 hover:to-purple-600 transition-all">
+              <WalletIcon className="w-10 h-10 animate-pulse" />
+              Expense Tracker
+            </h1>
+          </Link>
           <p className="text-gray-400 text-lg animate-slide-up delay-100">
             Track and manage your expenses with ease
           </p>
@@ -142,7 +144,7 @@ export default function Home() {
                       className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg"
                     >
                       <div>
-                        <div className="font-medium text-white">{expense.description}</div>
+                        <div className="font-medium text-white">{expense.title}</div>
                         <div className="text-sm text-gray-400">
                           {new Date(expense.date).toLocaleDateString()}
                         </div>
